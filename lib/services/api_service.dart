@@ -1,17 +1,19 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/restaurant.dart';
 
 class ApiService {
-  static const String baseUrl = "https://preprod.panel.tasty.ma/api";
-  static const String apiKey = "NJqQbTiOlzjLTLBmk590P2lbDxfd0wQ4"; 
+  // 🔐 Sécurisé : les valeurs viennent du fichier .env
+  static final String baseUrl = dotenv.env['BASE_URL'] ?? "";
+  static final String apiKey = dotenv.env['API_KEY'] ?? "";
 
   static Future<List<Restaurant>> fetchRestaurants() async {
     final response = await http.get(
       Uri.parse("$baseUrl/restaurants"),
       headers: {
         "x-api-key": apiKey,
-        "Accept": "application/json", 
+        "Accept": "application/json",
       },
     );
 

@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/main_screen.dart';
-import 'providers/cart_provider.dart'; // ✅ Ajout pour le panier
+import 'providers/cart_provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Charge le fichier .env avant de lancer l’app
+  await dotenv.load(fileName: ".env");
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  /// Vérifie si l'utilisateur est connecté (numéro de téléphone sauvegardé)
   Future<bool> _checkLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.containsKey("phone");
@@ -24,7 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()), // ✅ Fournisseur global du panier
+        ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -34,7 +39,6 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.white,
         ),
 
-        // 🔹 Page d’accueil selon l’état de connexion
         home: FutureBuilder<bool>(
           future: _checkLogin(),
           builder: (context, snapshot) {
@@ -43,14 +47,13 @@ class MyApp extends StatelessWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             } else if (snapshot.data == true) {
-              return const MainScreen(); // ✅ connecté
+              return const MainScreen();
             } else {
-              return const LoginScreen(); // ❌ non connecté
+              return const LoginScreen();
             }
           },
         ),
 
-        // 🔹 Routes globales
         routes: {
           "/home": (context) => const MainScreen(),
           "/login": (context) => const LoginScreen(),
